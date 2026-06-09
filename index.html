@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANG Reading Stats</title>
+
+  <!-- ─────────────────────────────────────────────
+       EXTERNAL DEPENDENCIES
+       • html2canvas  – renders the card to PNG
+       • Google Fonts – Bebas Neue (display) + Inter (body)
+  ───────────────────────────────────────────── -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ═══════════════════════════════════════════
+       DESIGN TOKENS — mude aqui, tudo segue
+    ═══════════════════════════════════════════ */
+    :root {
+      --c-bg:         #0d0d0d;
+      --c-surface:    #1a1a1a;
+      --c-border:     #2e2e2e;
+      --c-accent:     #e91e8c;
+      --c-accent-dim: #b01568;
+      --c-text:       #f0f0f0;
+      --c-muted:      #888888;
+      --c-faint:      #3a3a3a;
+
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body:    'Inter', sans-serif;
+
+      --card-w: 400px;
+      --card-h: 500px;
+      --r:      16px;
+    }
+
+    /* ═══════════════════════════════════════════
+       RESET
+    ═══════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--c-bg);
+      color: var(--c-text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      padding: 32px 16px 48px;
+    }
+
+    /* ═══════════════════════════════════════════
+       PAGE HEADER
+    ═══════════════════════════════════════════ */
+    .page-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .page-logo {
+      font-family: var(--font-display);
+      font-size: 2.4rem;
+      letter-spacing: 0.1em;
+      color: var(--c-accent);
+    }
+    .page-tagline {
+      font-size: 0.72rem;
+      color: var(--c-muted);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* ═══════════════════════════════════════════
+       MAIN LAYOUT
+       CSS Grid — dois blocos lado a lado no desktop,
+       empilhados no mobile. Sem flex que quebre.
+    ═══════════════════════════════════════════ */
+    .layout {
+      display: grid;
+      grid-template-columns: 340px var(--card-w);
+      gap: 40px;
+      justify-content: center;
+      align-items: start;
+    }
+
+    @media (max-width: 820px) {
+      .layout {
+        grid-template-columns: 1fr;
+        justify-items: center;
+      }
+    }
+
+    /* ═══════════════════════════════════════════
+       FORM PANEL
+    ═══════════════════════════════════════════ */
+    .form-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      max-width: 340px;
+    }
+
+    .section-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--c-border);
+    }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+
+    .field label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--c-muted);
+      letter-spacing: 0.04em;
+    }
+
+    .field input {
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      border-radius: 6px;
+      color: var(--c-text);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      padding: 10px 12px;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+    .field input:focus {
+      outline: none;
+      border-color: var(--c-accent);
+    }
+    .field input::placeholder { color: var(--c-faint); }
+
+    /* linha dupla horas + minutos */
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    /* ── upload de foto ── */
+    .upload-zone {
+      position: relative;
+      background: var(--c-surface);
+      border: 1px dashed var(--c-border);
+      border-radius: 6px;
+      padding: 18px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .upload-zone:hover       { border-color: var(--c-accent); background: #1c1118; }
+    .upload-zone.dragover    { border-color: var(--c-accent); background: #1c1118; }
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .upload-icon  { font-size: 1.4rem; }
+    .upload-text  { font-size: 0.72rem; color: var(--c-muted); margin-top: 4px; }
+    .upload-text strong { color: var(--c-accent); font-weight: 600; }
+    .upload-name  { font-size: 0.68rem; color: var(--c-accent); margin-top: 6px; display: none; }
+
+    /* ── botões ── */
+    .btn-generate {
+      background: var(--c-accent);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      letter-spacing: 0.12em;
+      padding: 13px;
+      width: 100%;
+      margin-top: 4px;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-generate:hover  { background: var(--c-accent-dim); }
+    .btn-generate:active { transform: scale(0.98); }
+
+    .btn-download {
+      background: transparent;
+      border: 1px solid var(--c-accent);
+      border-radius: 6px;
+      color: var(--c-accent);
+      cursor: pointer;
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      letter-spacing: 0.12em;
+      padding: 13px;
+      width: 100%;
+      display: none;
+      transition: background 0.2s;
+    }
+    .btn-download:hover { background: #1c1118; }
+
+    /* ═══════════════════════════════════════════
+       PREVIEW PANEL
+    ═══════════════════════════════════════════ */
+    .preview-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .preview-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+    }
+
+    /* ═══════════════════════════════════════════
+       O CARD — este elemento vira o PNG
+    ═══════════════════════════════════════════ */
+    #reading-card {
+      width: var(--card-w);
+      height: var(--card-h);
+      background: #111;
+      border-radius: var(--r);
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 0 0 1px #222, 0 0 60px -15px rgba(233,30,140,0.3);
+    }
+
+    /* camadas de foto */
+    .card-bg-photo {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .card-bg-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0.5) 50%,rgba(0,0,0,0.82) 100%);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    #reading-card.has-photo .card-bg-photo,
+    #reading-card.has-photo .card-bg-overlay { opacity: 1; }
+
+    /* conteúdo acima das camadas */
+    .card-inner {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 26px 26px 22px;
+    }
+
+    /* ilustração ocupa o espaço livre */
+    .card-art {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #reading-card.has-photo .book-svg { opacity: 0.3; }
+
+    /* bloco de stats fica fixo na base */
+    .card-stats { display: flex; flex-direction: column; gap: 16px; }
+
+    /* eyebrow: título + autor */
+    .card-eyebrow {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* stat genérico */
+    .stat-label {
+      font-size: 0.55rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 1px;
+    }
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 3.8rem;
+      line-height: 1;
+      color: #fff;
+      letter-spacing: 0.02em;
+    }
+    .stat-unit {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 400;
+      color: rgba(255,255,255,0.4);
+      margin-left: 3px;
+    }
+
+    /* linha secundária: pace + tempo */
+    .card-row {
+      display: flex;
+      gap: 32px;
+    }
+    .card-row .stat-value { font-size: 1.8rem; }
+
+    .card-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+    .card-logo {
+      font-family: var(--font-display);
+      font-size: 1.45rem;
+      letter-spacing: 0.12em;
+      color: var(--c-accent);
+    }
+
+    /* ── placeholder antes do primeiro render ── */
+    #card-placeholder {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      background: #111;
+      border-radius: var(--r);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.35s;
+    }
+    #card-placeholder.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .ph-icon { font-size: 2rem; opacity: 0.35; }
+    .ph-text  { font-size: 0.72rem; color: var(--c-faint); letter-spacing: 0.06em; }
+
+    /* ═══════════════════════════════════════════
+       OPEN BOOK SVG
+    ═══════════════════════════════════════════ */
+    .book-svg {
+      width: 200px;
+      height: 130px;
+      transition: opacity 0.3s;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="page-header">
+    <div class="page-logo">ANG</div>
+    <p class="page-tagline">Reading Stats · Share your session</p>
+  </header>
+
+  <main class="layout">
+
+    <!-- ════════════════════════════
+         PAINEL ESQUERDO: formulário
+    ════════════════════════════ -->
+    <section class="form-panel">
+
+      <p class="section-label">Sessão de leitura</p>
+
+      <div class="field">
+        <label for="input-title">Título do livro</label>
+        <input id="input-title" type="text" placeholder="Ex: Sapiens" autocomplete="off" />
+      </div>
+
+      <div class="field">
+        <label for="input-author">Autor</label>
+        <input id="input-author" type="text" placeholder="Ex: Yuval Noah Harari" autocomplete="off" />
+      </div>
+
+      <div class="field">
+        <label for="input-pages">Páginas lidas</label>
+        <input id="input-pages" type="number" min="1" placeholder="Ex: 48" />
+      </div>
+
+      <div class="field">
+        <label>Tempo de leitura</label>
+        <div class="field-row">
+          <input id="input-hours"   type="number" min="0" max="23" placeholder="horas" />
+          <input id="input-minutes" type="number" min="0" max="59" placeholder="min"   />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Foto de fundo <span style="color:var(--c-faint);font-weight:400">(opcional)</span></label>
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" id="input-photo" accept="image/*" />
+          <div class="upload-icon">📷</div>
+          <p class="upload-text">Arraste ou <strong>escolha uma foto</strong></p>
+          <p class="upload-name" id="upload-name"></p>
+        </div>
+      </div>
+
+      <button class="btn-generate" id="btn-generate">GERAR CARD</button>
+      <button class="btn-download" id="btn-download">↓ BAIXAR PNG</button>
+
+    </section>
+
+    <!-- ════════════════════════════
+         PAINEL DIREITO: preview
+    ════════════════════════════ -->
+    <section class="preview-panel">
+
+      <p class="preview-label">Preview</p>
+
+      <div id="reading-card">
+
+        <!-- placeholder inicial -->
+        <div id="card-placeholder">
+          <span class="ph-icon">📖</span>
+          <p class="ph-text">Preencha os dados e clique em Gerar Card</p>
+        </div>
+
+        <!-- foto de fundo -->
+        <div class="card-bg-photo"   id="card-bg-photo"></div>
+        <div class="card-bg-overlay"></div>
+
+        <!-- conteúdo do card -->
+        <div class="card-inner">
+
+          <div class="card-art">
+            <!-- ╔══════════════════════════════════════╗
+                 ║  LIVRO ABERTO SVG                    ║
+                 ║  Troque este bloco para outro visual ║
+                 ╚══════════════════════════════════════╝ -->
+            <svg class="book-svg" viewBox="0 0 200 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- spine -->
+              <line x1="100" y1="14" x2="100" y2="120" stroke="rgba(233,30,140,0.65)" stroke-width="1.8"/>
+              <!-- capa esquerda -->
+              <path d="M10 18 Q10 10 18 10 L98 10 L98 120 L18 120 Q10 120 10 112 Z"
+                    fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.16)" stroke-width="1"/>
+              <!-- capa direita -->
+              <path d="M190 18 Q190 10 182 10 L102 10 L102 120 L182 120 Q190 120 190 112 Z"
+                    fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.16)" stroke-width="1"/>
+              <!-- linhas página esquerda -->
+              <g stroke="rgba(233,30,140,0.55)" stroke-width="1" stroke-linecap="round">
+                <line x1="22" y1="28" x2="90" y2="28"/>
+                <line x1="22" y1="38" x2="90" y2="38"/>
+                <line x1="22" y1="48" x2="76" y2="48"/>
+                <line x1="22" y1="58" x2="90" y2="58"/>
+                <line x1="22" y1="68" x2="90" y2="68"/>
+                <line x1="22" y1="78" x2="64" y2="78"/>
+                <line x1="22" y1="88" x2="90" y2="88"/>
+                <line x1="22" y1="98" x2="90" y2="98"/>
+                <line x1="22" y1="108" x2="52" y2="108"/>
+              </g>
+              <!-- linhas página direita (mais suaves) -->
+              <g stroke="rgba(233,30,140,0.28)" stroke-width="1" stroke-linecap="round">
+                <line x1="110" y1="28" x2="178" y2="28"/>
+                <line x1="110" y1="38" x2="164" y2="38"/>
+                <line x1="110" y1="48" x2="178" y2="48"/>
+                <line x1="110" y1="58" x2="178" y2="58"/>
+                <line x1="110" y1="68" x2="148" y2="68"/>
+                <line x1="110" y1="78" x2="178" y2="78"/>
+                <line x1="110" y1="88" x2="178" y2="88"/>
+                <line x1="110" y1="98" x2="156" y2="98"/>
+                <line x1="110" y1="108" x2="178" y2="108"/>
+              </g>
+              <!-- glow no spine -->
+              <circle cx="100" cy="65" r="3.5" fill="rgba(233,30,140,0.75)"/>
+            </svg>
+          </div>
+
+          <div class="card-stats">
+
+            <p class="card-eyebrow" id="card-eyebrow">Título do Livro · Autor</p>
+
+            <!-- distância (primária) -->
+            <div>
+              <p class="stat-label">Distância</p>
+              <p class="stat-value" id="card-pages">—<span class="stat-unit">págs</span></p>
+            </div>
+
+            <!-- pace + tempo (secundárias) -->
+            <div class="card-row">
+              <div>
+                <p class="stat-label">Pace</p>
+                <p class="stat-value" id="card-pace">—<span class="stat-unit">min/pág</span></p>
+              </div>
+              <div>
+                <p class="stat-label">Tempo</p>
+                <p class="stat-value" id="card-time">—</p>
+              </div>
+            </div>
+
+            <div class="card-divider"></div>
+
+            <div class="card-footer">
+              <span class="card-logo">ANG</span>
+            </div>
+
+          </div>
+        </div>
+      </div><!-- /#reading-card -->
+
+    </section>
+  </main>
+
+  <!-- ═══════════════════════════════════════════
+       JAVASCRIPT
+  ═══════════════════════════════════════════ -->
+  <script>
+    /* ─────────────────────────────────────────
+       § 1 · DOM REFERENCES
+    ───────────────────────────────────────── */
+    const $ = id => document.getElementById(id);
+    const DOM = {
+      title:       $('input-title'),
+      author:      $('input-author'),
+      pages:       $('input-pages'),
+      hours:       $('input-hours'),
+      minutes:     $('input-minutes'),
+      photo:       $('input-photo'),
+      uploadZone:  $('upload-zone'),
+      uploadName:  $('upload-name'),
+      btnGenerate: $('btn-generate'),
+      btnDownload: $('btn-download'),
+      card:        $('reading-card'),
+      cardBgPhoto: $('card-bg-photo'),
+      placeholder: $('card-placeholder'),
+      eyebrow:     $('card-eyebrow'),
+      cardPages:   $('card-pages'),
+      cardPace:    $('card-pace'),
+      cardTime:    $('card-time'),
+    };
+
+    /* ─────────────────────────────────────────
+       § 2 · PHOTO UPLOAD
+    ───────────────────────────────────────── */
+    function loadPhoto(file) {
+      if (!file || !file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        DOM.cardBgPhoto.style.backgroundImage = `url('${e.target.result}')`;
+        DOM.card.classList.add('has-photo');
+        DOM.uploadName.textContent = '✓ ' + file.name;
+        DOM.uploadName.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    DOM.photo.addEventListener('change', e => loadPhoto(e.target.files[0]));
+
+    DOM.uploadZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      DOM.uploadZone.classList.add('dragover');
+    });
+    DOM.uploadZone.addEventListener('dragleave', () => DOM.uploadZone.classList.remove('dragover'));
+    DOM.uploadZone.addEventListener('drop', e => {
+      e.preventDefault();
+      DOM.uploadZone.classList.remove('dragover');
+      loadPhoto(e.dataTransfer.files[0]);
+    });
+
+    /* ─────────────────────────────────────────
+       § 3 · HELPERS DE CÁLCULO
+    ───────────────────────────────────────── */
+    function formatTime(totalMin) {
+      const h = Math.floor(totalMin / 60);
+      const m = totalMin % 60;
+      if (h && m) return `${h}h ${m}m`;
+      if (h)      return `${h}h`;
+      return `${m}m`;
+    }
+
+    function calcPace(totalMin, pages) {
+      if (!pages) return '—';
+      const v = totalMin / pages;
+      return Number.isInteger(v) ? String(v) : v.toFixed(1);
+    }
+
+    /* ─────────────────────────────────────────
+       § 4 · RENDER DO CARD
+    ───────────────────────────────────────── */
+    function renderCard() {
+      const title   = DOM.title.value.trim();
+      const author  = DOM.author.value.trim();
+      const pages   = parseInt(DOM.pages.value, 10);
+      const hours   = parseInt(DOM.hours.value,   10) || 0;
+      const minutes = parseInt(DOM.minutes.value, 10) || 0;
+      const total   = hours * 60 + minutes;
+
+      if (!pages || pages <= 0) { flashError(DOM.pages);   return; }
+      if (total === 0)          { flashError(DOM.hours);   return; }
+
+      const bookLine = [title, author].filter(Boolean).join(' · ');
+      DOM.eyebrow.textContent   = bookLine || 'Sessão de leitura';
+      DOM.cardPages.innerHTML   = `${pages}<span class="stat-unit"> págs</span>`;
+      DOM.cardPace.innerHTML    = `${calcPace(total, pages)}<span class="stat-unit"> min/pág</span>`;
+      DOM.cardTime.textContent  = formatTime(total);
+
+      DOM.placeholder.classList.add('hidden');
+      DOM.btnDownload.style.display = 'block';
+    }
+
+    /* ─────────────────────────────────────────
+       § 5 · FEEDBACK DE ERRO
+    ───────────────────────────────────────── */
+    function flashError(el) {
+      el.style.borderColor = '#ff4d4d';
+      el.focus();
+      setTimeout(() => el.style.borderColor = '', 2000);
+    }
+
+    /* ─────────────────────────────────────────
+       § 6 · EXPORT PNG
+    ───────────────────────────────────────── */
+    async function downloadCard() {
+      DOM.btnDownload.textContent = 'GERANDO...';
+      DOM.btnDownload.disabled = true;
+      try {
+        const canvas = await html2canvas(DOM.card, {
+          scale: 3,
+          useCORS: true,
+          backgroundColor: null,
+          logging: false,
+        });
+        const safe = (DOM.title.value.trim() || 'reading-stats')
+          .toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40);
+        const a = document.createElement('a');
+        a.download = `ang-${safe}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      } catch (err) {
+        console.error('[ANG Export]', err);
+        alert('Erro ao gerar PNG. Tente novamente.');
+      } finally {
+        DOM.btnDownload.textContent = '↓ BAIXAR PNG';
+        DOM.btnDownload.disabled = false;
+      }
+    }
+
+    /* ─────────────────────────────────────────
+       § 7 · EVENT LISTENERS
+    ───────────────────────────────────────── */
+    DOM.btnGenerate.addEventListener('click', renderCard);
+    DOM.btnDownload.addEventListener('click', downloadCard);
+
+    // Enter em qualquer campo dispara o render
+    [DOM.title, DOM.author, DOM.pages, DOM.hours, DOM.minutes].forEach(el => {
+      el.addEventListener('keydown', e => { if (e.key === 'Enter') renderCard(); });
+    });
+
+    /* ─────────────────────────────────────────
+       § 8 · LIVE PREVIEW (debounced)
+    ───────────────────────────────────────── */
+    let debounce;
+    function maybeRender() {
+      clearTimeout(debounce);
+      debounce = setTimeout(() => {
+        if (DOM.pages.value > 0 && (DOM.hours.value > 0 || DOM.minutes.value > 0)) {
+          renderCard();
+        }
+      }, 400);
+    }
+    [DOM.title, DOM.author, DOM.pages, DOM.hours, DOM.minutes].forEach(el => {
+      el.addEventListener('input', maybeRender);
+    });
+  </script>
+
+</body>
+</html>
