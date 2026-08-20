@@ -16,11 +16,7 @@ Preencha o livro, as páginas lidas e o tempo da sessão e o site calcula o pace
 
 Este é um projeto 100% estático (sem build, sem dependências para instalar), ou seja, só abrir o link e inserir seus dados (que eu não salvo em lugar algum).
 
-1. Abra o [`index.html`](index.html) diretamente no navegador, **ou**
-2. Sirva a pasta com qualquer servidor estático, por exemplo:
-   ```bash
-   npx serve .
-   ```
+1. Abra [o [`index.html`](index.html)](https://ang-ulala.github.io/ReadingWrapped/) diretamente no navegador
 
 ## Stack
 
