@@ -53,15 +53,58 @@
       </div>
 
       <div class="field">
-        <label for="input-pages">Páginas lidas</label>
-        <input id="input-pages" type="number" min="1" placeholder="Ex: 28" />
+        <div class="field-head">
+          <label>Páginas</label>
+          <div class="mode-toggle" id="pages-mode-toggle" role="group" aria-label="Modo de páginas">
+            <button type="button" class="mode-btn active" data-mode="total">Total lido</button>
+            <button type="button" class="mode-btn" data-mode="range">Início/fim</button>
+          </div>
+        </div>
+
+        <div class="mode-panel" data-pages-panel="total">
+          <input id="input-pages" type="number" min="1" placeholder="Ex: 28" />
+        </div>
+        <div class="mode-panel" data-pages-panel="range" hidden>
+          <div class="field-row">
+            <input id="input-page-start" type="number" min="0" placeholder="Pág. inicial" aria-label="Página inicial" />
+            <input id="input-page-end"   type="number" min="1" placeholder="Pág. final"   aria-label="Página final" />
+          </div>
+        </div>
       </div>
 
       <div class="field">
-        <label id="time-label">Tempo de leitura</label>
-        <div class="field-row" role="group" aria-labelledby="time-label">
-          <input id="input-hours"   type="number" min="0" max="23" placeholder="horas" aria-label="Horas" />
-          <input id="input-minutes" type="number" min="0" max="59" placeholder="min"   aria-label="Minutos" />
+        <div class="field-head">
+          <label id="time-label">Tempo de leitura</label>
+          <div class="mode-toggle" id="time-mode-toggle" role="group" aria-labelledby="time-label">
+            <button type="button" class="mode-btn active" data-mode="timer">Cronômetro</button>
+            <button type="button" class="mode-btn" data-mode="clock">Início/fim</button>
+            <button type="button" class="mode-btn" data-mode="manual">Tempo total</button>
+          </div>
+        </div>
+
+        <!-- cronômetro: modo padrão -->
+        <div class="mode-panel" data-time-panel="timer">
+          <div class="timer-box" id="timer-box">
+            <p class="timer-display" id="timer-display">00:00:00</p>
+            <p class="timer-hint" id="timer-hint">Ainda não iniciado</p>
+            <button type="button" class="btn-timer-start" id="btn-timer-start">▶ Iniciar leitura</button>
+          </div>
+        </div>
+
+        <!-- horário de início / fim -->
+        <div class="mode-panel" data-time-panel="clock" hidden>
+          <div class="field-row">
+            <input id="input-clock-start" type="time" aria-label="Horário de início" />
+            <input id="input-clock-end"   type="time" aria-label="Horário de término" />
+          </div>
+        </div>
+
+        <!-- tempo total manual -->
+        <div class="mode-panel" data-time-panel="manual" hidden>
+          <div class="field-row">
+            <input id="input-hours"   type="number" min="0" max="23" placeholder="horas" aria-label="Horas" />
+            <input id="input-minutes" type="number" min="0" max="59" placeholder="min"   aria-label="Minutos" />
+          </div>
         </div>
       </div>
 
@@ -72,6 +115,38 @@
           <div class="upload-icon" aria-hidden="true">📷</div>
           <p class="upload-text">Arraste ou <strong>escolha uma foto</strong></p>
           <p class="upload-name" id="upload-name"></p>
+        </div>
+      </div>
+
+      <p class="section-label">Aparência do card</p>
+
+      <div class="field">
+        <label>Tema</label>
+        <div class="mode-toggle" id="theme-mode-toggle" role="group" aria-label="Tema do card">
+          <button type="button" class="mode-btn active" data-mode="dark">Escuro</button>
+          <button type="button" class="mode-btn" data-mode="light">Claro</button>
+          <button type="button" class="mode-btn" data-mode="gray">Cinza</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Cor de destaque</label>
+        <div class="mode-toggle" id="accent-mode-toggle" role="group" aria-label="Cor de destaque do card">
+          <button type="button" class="mode-btn active" data-mode="pink">
+            <span class="swatch" style="background:#e91e8c"></span>Rosa
+          </button>
+          <button type="button" class="mode-btn" data-mode="white">
+            <span class="swatch" style="background:#ffffff"></span>Branco
+          </button>
+          <button type="button" class="mode-btn" data-mode="gray">
+            <span class="swatch" style="background:#9a9a9a"></span>Cinza
+          </button>
+          <button type="button" class="mode-btn" data-mode="blue">
+            <span class="swatch" style="background:#3b82f6"></span>Azul
+          </button>
+          <button type="button" class="mode-btn" data-mode="green">
+            <span class="swatch" style="background:#1a5d3a"></span>Verde
+          </button>
         </div>
       </div>
 
@@ -87,7 +162,7 @@
 
       <p class="preview-label">Preview</p>
 
-      <div id="reading-card">
+      <div id="reading-card" data-theme="dark" data-accent="pink">
 
         <!-- placeholder inicial -->
         <div id="card-placeholder">
@@ -109,7 +184,7 @@
                  ╚══════════════════════════════════════╝ -->
             <svg class="book-svg" viewBox="0 0 200 130" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <!-- spine -->
-              <line x1="100" y1="14" x2="100" y2="120" stroke="rgba(233,30,140,0.65)" stroke-width="1.8"/>
+              <line class="svg-spine" x1="100" y1="14" x2="100" y2="120" stroke-width="1.8"/>
               <!-- capa esquerda -->
               <path d="M10 18 Q10 10 18 10 L98 10 L98 120 L18 120 Q10 120 10 112 Z"
                     fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.16)" stroke-width="1"/>
@@ -117,7 +192,7 @@
               <path d="M190 18 Q190 10 182 10 L102 10 L102 120 L182 120 Q190 120 190 112 Z"
                     fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.16)" stroke-width="1"/>
               <!-- linhas página esquerda -->
-              <g stroke="rgba(233,30,140,0.55)" stroke-width="1" stroke-linecap="round">
+              <g class="svg-lines-strong" stroke-width="1" stroke-linecap="round">
                 <line x1="22" y1="28" x2="90" y2="28"/>
                 <line x1="22" y1="38" x2="90" y2="38"/>
                 <line x1="22" y1="48" x2="76" y2="48"/>
@@ -129,7 +204,7 @@
                 <line x1="22" y1="108" x2="52" y2="108"/>
               </g>
               <!-- linhas página direita (mais suaves) -->
-              <g stroke="rgba(233,30,140,0.28)" stroke-width="1" stroke-linecap="round">
+              <g class="svg-lines-soft" stroke-width="1" stroke-linecap="round">
                 <line x1="110" y1="28" x2="178" y2="28"/>
                 <line x1="110" y1="38" x2="164" y2="38"/>
                 <line x1="110" y1="48" x2="178" y2="48"/>
@@ -141,7 +216,7 @@
                 <line x1="110" y1="108" x2="178" y2="108"/>
               </g>
               <!-- glow no spine -->
-              <circle cx="100" cy="65" r="3.5" fill="rgba(233,30,140,0.75)"/>
+              <circle class="svg-glow-dot" cx="100" cy="65" r="3.5"/>
             </svg>
           </div>
 
@@ -179,6 +254,22 @@
 
     </section>
   </main>
+
+  <!-- ════════════════════════════
+       MODO LEITURA — cronômetro em tela cheia
+  ════════════════════════════ -->
+  <div class="reading-lock" id="reading-lock" hidden>
+    <div class="lock-inner">
+      <p class="lock-eyebrow">Modo leitura</p>
+      <p class="lock-book" id="lock-book-title">Sessão de leitura</p>
+      <p class="lock-timer" id="lock-timer">00:00:00</p>
+      <div class="lock-actions">
+        <button type="button" class="btn-lock-pause"  id="btn-lock-pause">Pausar</button>
+        <button type="button" class="btn-lock-finish" id="btn-lock-finish">Terminei de ler</button>
+      </div>
+      <button type="button" class="btn-lock-cancel" id="btn-lock-cancel">Cancelar sessão</button>
+    </div>
+  </div>
 
   <script src="js/app.js"></script>
 

@@ -132,6 +132,91 @@ body {
   gap: 8px;
 }
 
+/* ── cabeçalho do field com toggle de modo ── */
+.field-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mode-toggle {
+  display: flex;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 999px;
+  padding: 2px;
+  gap: 2px;
+}
+.mode-btn {
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  color: var(--c-muted);
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 5px 9px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
+}
+.mode-toggle     { flex-wrap: wrap; }
+.mode-btn:hover  { color: var(--c-text); }
+.mode-btn.active { background: var(--c-accent); color: #fff; }
+
+.mode-btn .swatch {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.25);
+}
+
+.mode-panel[hidden] { display: none; }
+
+/* ── caixa do cronômetro (painel do formulário) ── */
+.timer-box {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 6px;
+  padding: 16px 12px;
+  text-align: center;
+}
+.timer-display {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  letter-spacing: 0.04em;
+  color: var(--c-text);
+  font-variant-numeric: tabular-nums;
+}
+.timer-hint {
+  font-size: 0.68rem;
+  color: var(--c-muted);
+  margin-top: 2px;
+}
+.btn-timer-start {
+  background: var(--c-accent);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  padding: 9px 14px;
+  margin-top: 10px;
+  width: 100%;
+  transition: background 0.2s;
+}
+.btn-timer-start:hover { background: var(--c-accent-dim); }
+.timer-box.is-done .timer-display { color: var(--c-accent); }
+
 /* ── upload de foto ── */
 .upload-zone {
   position: relative;
@@ -214,13 +299,78 @@ body {
    O CARD — este elemento vira o PNG
 ═══════════════════════════════════════════ */
 #reading-card {
+  /* ── tokens do card: mude via [data-theme] / [data-accent] ── */
+  --card-bg:           #111111;
+  --card-ring:         #222222;
+  --card-text:         #ffffff;
+  --card-text-muted:   rgba(255,255,255,0.45);
+  --card-text-faint:   rgba(255,255,255,0.1);
+  --card-accent:       #e91e8c;
+  --card-accent-dim:   #b01568;
+  --card-glow:         rgba(233,30,140,0.3);
+  --card-overlay-from: rgba(0,0,0,0.75);
+  --card-overlay-mid:  rgba(0,0,0,0.5);
+  --card-overlay-to:   rgba(0,0,0,0.82);
+
   width: var(--card-w);
   height: var(--card-h);
-  background: #111;
+  background: var(--card-bg);
   border-radius: var(--r);
   overflow: hidden;
   position: relative;
-  box-shadow: 0 0 0 1px #222, 0 0 60px -15px rgba(233,30,140,0.3);
+  box-shadow: 0 0 0 1px var(--card-ring), 0 0 60px -15px var(--card-glow);
+  transition: background 0.3s;
+}
+
+/* ── temas ── */
+#reading-card[data-theme="light"] {
+  --card-bg:         #f7f5f2;
+  --card-ring:       #e2ddd6;
+  --card-text:       #17140f;
+  --card-text-muted: rgba(23,20,15,0.5);
+  --card-text-faint: rgba(23,20,15,0.12);
+}
+#reading-card[data-theme="gray"] {
+  --card-bg:         #2b2b2d;
+  --card-ring:       #3d3d40;
+  --card-text:       #f2f2f2;
+  --card-text-muted: rgba(242,242,242,0.5);
+  --card-text-faint: rgba(242,242,242,0.12);
+}
+
+/* ── cores de destaque ── */
+#reading-card[data-accent="pink"] {
+  --card-accent:     #e91e8c;
+  --card-accent-dim: #b01568;
+  --card-glow:       rgba(233,30,140,0.3);
+}
+#reading-card[data-accent="white"] {
+  --card-accent:     #ffffff;
+  --card-accent-dim: #cfcfcf;
+  --card-glow:       rgba(255,255,255,0.18);
+}
+#reading-card[data-accent="gray"] {
+  --card-accent:     #9a9a9a;
+  --card-accent-dim: #737373;
+  --card-glow:       rgba(154,154,154,0.25);
+}
+#reading-card[data-accent="blue"] {
+  --card-accent:     #3b82f6;
+  --card-accent-dim: #2563eb;
+  --card-glow:       rgba(59,130,246,0.3);
+}
+#reading-card[data-accent="green"] {
+  --card-accent:     #1a5d3a;
+  --card-accent-dim: #123f27;
+  --card-glow:       rgba(26,93,58,0.35);
+}
+
+/* com foto de fundo, o scrim é sempre escuro — texto claro sempre,
+   independente do tema escolhido, para manter a legibilidade sobre a foto */
+#reading-card.has-photo {
+  --card-text:       #ffffff;
+  --card-text-muted: rgba(255,255,255,0.5);
+  --card-text-faint: rgba(255,255,255,0.14);
 }
 
 /* camadas de foto */
@@ -235,7 +385,7 @@ body {
 .card-bg-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(160deg,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0.5) 50%,rgba(0,0,0,0.82) 100%);
+  background: linear-gradient(160deg, var(--card-overlay-from) 0%, var(--card-overlay-mid) 50%, var(--card-overlay-to) 100%);
   opacity: 0;
   transition: opacity 0.4s;
 }
@@ -272,7 +422,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.13em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.45);
+  color: var(--card-text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -284,21 +434,21 @@ body {
   font-weight: 600;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.4);
+  color: var(--card-text-muted);
   margin-bottom: 1px;
 }
 .stat-value {
   font-family: var(--font-display);
   font-size: 3.8rem;
   line-height: 1;
-  color: #fff;
+  color: var(--card-text);
   letter-spacing: 0.02em;
 }
 .stat-unit {
   font-family: var(--font-body);
   font-size: 0.7rem;
   font-weight: 400;
-  color: rgba(255,255,255,0.4);
+  color: var(--card-text-muted);
   margin-left: 3px;
 }
 
@@ -311,7 +461,7 @@ body {
 
 .card-divider {
   height: 1px;
-  background: rgba(255,255,255,0.1);
+  background: var(--card-text-faint);
 }
 
 .card-footer {
@@ -323,7 +473,7 @@ body {
   font-family: var(--font-display);
   font-size: 1.45rem;
   letter-spacing: 0.12em;
-  color: var(--c-accent);
+  color: var(--card-accent);
 }
 
 /* ── placeholder antes do primeiro render ── */
@@ -331,7 +481,7 @@ body {
   position: absolute;
   inset: 0;
   z-index: 10;
-  background: #111;
+  background: var(--card-bg);
   border-radius: var(--r);
   display: flex;
   flex-direction: column;
@@ -355,6 +505,104 @@ body {
   height: 130px;
   transition: opacity 0.3s;
 }
+.book-svg .svg-spine        { stroke: var(--card-accent); opacity: 0.65; }
+.book-svg .svg-lines-strong { stroke: var(--card-accent); opacity: 0.55; }
+.book-svg .svg-lines-soft   { stroke: var(--card-accent); opacity: 0.28; }
+.book-svg .svg-glow-dot     { fill: var(--card-accent);   opacity: 0.75; }
+
+/* ═══════════════════════════════════════════
+   MODO LEITURA — cronômetro em tela cheia
+═══════════════════════════════════════════ */
+.reading-lock {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: lock-fade-in 0.3s ease;
+}
+.reading-lock[hidden] { display: none; }
+
+@keyframes lock-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.lock-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+}
+.lock-eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--c-accent);
+  font-weight: 600;
+}
+.lock-book {
+  font-size: 0.95rem;
+  color: var(--c-muted);
+  max-width: 80vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lock-timer {
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 15vw, 7rem);
+  color: var(--c-text);
+  letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums;
+  margin: 12px 0;
+}
+.reading-lock.is-paused .lock-timer { opacity: 0.4; }
+
+.lock-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+.btn-lock-pause, .btn-lock-finish {
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  padding: 14px 22px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s, border-color 0.2s;
+}
+.btn-lock-pause {
+  background: transparent;
+  border: 1px solid var(--c-border);
+  color: var(--c-text);
+}
+.btn-lock-pause:hover { border-color: var(--c-accent); }
+.btn-lock-finish {
+  background: var(--c-accent);
+  border: none;
+  color: #fff;
+}
+.btn-lock-finish:hover { background: var(--c-accent-dim); }
+.btn-lock-pause:active, .btn-lock-finish:active { transform: scale(0.97); }
+
+.btn-lock-cancel {
+  background: none;
+  border: none;
+  color: var(--c-faint);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-top: 18px;
+  padding: 8px;
+}
+.btn-lock-cancel:hover { color: var(--c-muted); }
 
 /* ═══════════════════════════════════════════
    ACESSIBILIDADE
