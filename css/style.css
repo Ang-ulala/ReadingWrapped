@@ -14,8 +14,10 @@
   --font-display: 'Bebas Neue', sans-serif;
   --font-body:    'Inter', sans-serif;
 
-  --card-w: 400px;
-  --card-h: 500px;
+  /* 360×640 @ scale 3 (ver downloadCard em app.js) = 1080×1920px,
+     a dimensão exata do story do Instagram (9:16) */
+  --card-w: 360px;
+  --card-h: 640px;
   --r:      16px;
 }
 
@@ -405,7 +407,7 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 26px 26px 22px;
+  padding: 32px 28px 30px;
 }
 
 /* ilustração ocupa o espaço livre */
@@ -419,7 +421,7 @@ body {
 #reading-card.has-photo .book-svg { opacity: 0.3; }
 
 /* bloco de stats fica fixo na base */
-.card-stats { display: flex; flex-direction: column; gap: 16px; }
+.card-stats { display: flex; flex-direction: column; gap: 20px; }
 
 /* eyebrow: título + autor */
 .card-eyebrow {
@@ -444,7 +446,7 @@ body {
 }
 .stat-value {
   font-family: var(--font-display);
-  font-size: 3.8rem;
+  font-size: 4.6rem;
   line-height: 1;
   color: var(--card-text);
   letter-spacing: 0.02em;
@@ -462,7 +464,7 @@ body {
   display: flex;
   gap: 32px;
 }
-.card-row .stat-value { font-size: 1.8rem; }
+.card-row .stat-value { font-size: 2.1rem; }
 
 .card-divider {
   height: 1px;
@@ -506,8 +508,8 @@ body {
    OPEN BOOK SVG
 ═══════════════════════════════════════════ */
 .book-svg {
-  width: 200px;
-  height: 130px;
+  width: 260px;
+  height: 169px;
   transition: opacity 0.3s;
 }
 .book-svg .svg-spine        { stroke: var(--card-accent); opacity: 0.65; }
