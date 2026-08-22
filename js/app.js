@@ -15,7 +15,6 @@ const DOM = {
   photo:        $('input-photo'),
   uploadZone:   $('upload-zone'),
   uploadName:   $('upload-name'),
-  btnGenerate:  $('btn-generate'),
   btnDownload:  $('btn-download'),
   card:         $('reading-card'),
   cardBgPhoto:  $('card-bg-photo'),
@@ -366,7 +365,6 @@ function clipToRoundedCorners(sourceCanvas, radius) {
 /* ─────────────────────────────────────────
    § 7 · EVENT LISTENERS
 ───────────────────────────────────────── */
-DOM.btnGenerate.addEventListener('click', renderCard);
 DOM.btnDownload.addEventListener('click', downloadCard);
 
 const INPUT_FIELDS = [
